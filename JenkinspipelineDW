@@ -1,0 +1,71 @@
+pipeline{
+agent any;
+
+tools{
+    maven 'maven3.6.3'
+}
+
+options{
+    timestamps()
+    
+
+}
+stages
+{
+  stage ('CheckOutCode'){
+    steps{
+        git branch: 'development', url: 'https://github.com/vijayabhaskarmakke/maven-web-application.git' 
+      }
+  }
+   stage ('Build'){
+   
+      steps{
+       sh "mvn clean package"
+      }
+       
+   }
+
+   stage ('ExecuteSonarQubeReport'){
+       steps{
+           sh "mvn sonar:sonar"
+       }
+   }
+
+   stage ('UploadArtifactIntoNexus'){
+       steps{
+           sh "mvn deploy"
+       }
+   }
+   stage ('DeployAppIntoTomcatServer'){
+       steps{
+           sshagent(['1fe22176-bd27-489d-9ee7-d1cda91ea046']) {
+           sh "scp -o StrictHostKeyChecking=no target/maven-web-application.war ec2-user@54.237.5.139:/opt/apache-tomcat-8.5.63/webapps/"
+    }  
+       }
+   }
+
+ 
+}
+post {
+    
+     success{
+        mail body: '''Build Over...success
+
+Regards,
+Vijay,
+9985623694''', subject: 'Build Over...Successfully', to: 'mvijayabhaskar383@gmail.com' 
+     }
+  
+
+     failure{
+         
+
+   mail body: '''Build Over...Failed
+
+Regards,
+Vijay,
+9985623694''', subject: 'Build Over...Failed', to: 'mvijayabhaskar383@gmail.com'     
+ 
+}
+}
+}
