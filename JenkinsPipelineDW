@@ -47,8 +47,7 @@ stages
  */
 }
 post {
-    cleanWs()
-     success{
+         success{
         mail body: '''Build Over...success
 
 Regards,
@@ -58,7 +57,7 @@ Vijay,
   
 
      failure{
-         cleanWs()
+ 
 
    mail body: '''Build Over...Failed
 
